@@ -41,6 +41,7 @@ fi
 
 yt-dlp -f 139 "$1" -o "$PODOUTUPTSTRING"
 
+detox -v "$PODPATH/$uploader/"
 
 # log the $1 and $PODOUTUPTSTRING to a file in $HOME called yix_data.log
 echo "$1" "$PODOUTUPTSTRING" >> $HOME/yix_data.log

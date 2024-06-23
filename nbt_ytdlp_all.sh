@@ -13,3 +13,7 @@ done < "$1"
 
 # ask the user if they want to delete the file with the URLs
 read -p "Delete the file with URLs? [y/N] " -n 1 -r
+# if the user answers yes, delete the file
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+    rm "$1"
+fi
