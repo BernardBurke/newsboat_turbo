@@ -15,15 +15,39 @@ if [[ ! -d "$main_folder" ]]; then
     exit 1
 fi
 
+check_map() {
+    # check $1 to be in a local equivalence map
+   
+    if [[ "$1" == "$Poddle/The Losers' Club: The Barrens" ]]; then
+        echo "$Poddle/The_Losers_Club_The_Barrens"
+    elif [[ "$1" == "$Poddle/The codswallp" ]]; then 
+        echo "The_codswallp"
+    else
+        echo "$1"
+    fi
+
+}
 
 DRY_RUN=0  # Set to 1 to enable dry run mode
 
 echo "Running on $Poddle in non-dry run mode"
 
 # Function to handle a single space-containing folder
+# A Pain in the kneck, sure. ToDo move this map to data somewhere
 process_folder() {
     local space_folder="$1"
-    underscore_folder="${space_folder// /_}"
+
+    if [[ "$1" == "$Poddle/The Losers' Club: The Barrens" ]]; then
+        echo "Found"
+    fi
+
+    underscore_folder="$(check_map "$space_folder")"
+
+    underscore_folder="${underscore_folder// /_}"
+
+    echo "Running on $space_folder to $underscore_folder after map checking"
+
+    
 
     if [[ -d "$underscore_folder" ]]; then
         # Simulate moving files in dry run mode
