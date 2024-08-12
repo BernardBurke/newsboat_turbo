@@ -20,6 +20,10 @@ check_map() {
    
     if [[ "$1" == "$Poddle/The Losers' Club: The Barrens" ]]; then
         echo "$Poddle/The_Losers_Club_The_Barrens"
+    elif [[ "$1" == "$Poddle/Escape Hatch (formerly Dune Pod)" ]]; then
+	echo "$Poddle/Escape_Hatch"
+   elif [[ "$1" == "$Poddle/Security Now (Audio)" ]]; then
+        echo "$Poddle/Security_Now"
     elif [[ "$1" == "$Poddle/The codswallp" ]]; then 
         echo "The_codswallp"
     else
@@ -40,6 +44,11 @@ process_folder() {
     if [[ "$1" == "$Poddle/The Losers' Club: The Barrens" ]]; then
         echo "Found"
     fi
+
+    if [[ "$1" == "$Poddle/Escape Hatch (formerly Dune Pod)" ]]; then
+        echo "Dune Found"
+    fi
+
 
     underscore_folder="$(check_map "$space_folder")"
 
