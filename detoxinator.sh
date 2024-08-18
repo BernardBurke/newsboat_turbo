@@ -24,6 +24,10 @@ check_map() {
 	echo "$Poddle/Escape_Hatch"
    elif [[ "$1" == "$Poddle/Security Now (Audio)" ]]; then
         echo "$Poddle/Security_Now"
+   elif [[ "$1" == "$Poddle/The Lady Killers: A Feminine Rage Podcast" ]]; then
+	echo "$Poddle/The_Lady_Killers_A_Feminine_Rage_Podcast"
+   elif [[ "$1" == "$Poddle/Perfect Organism: The Alien Saga" ]]; then
+	echo "$Poddle/Perfect_Organism_The_Alien_Saga_Podcast"
     elif [[ "$1" == "$Poddle/The codswallp" ]]; then 
         echo "The_codswallp"
     else
