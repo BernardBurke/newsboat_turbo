@@ -18,6 +18,8 @@ get_uploader() {
 	# Extract and print uploader
 	uploader=$(echo "$video_info" | jq -r '.uploader')
 
+	uploader=$(echo "$uploader" | sed -e 's/[ &[:punct:]]/_/g' -e 's/[^[:alnum:]_]//g') 
+
 	if [[ -z "$uploader" ]]; then
 		echo ""	
 	else
