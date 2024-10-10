@@ -33,16 +33,65 @@ echo "Podcast Name: $PODCAST_NAME"
 PODDLE=~/Poddle
 
 TMP=$(mktemp)
+echo "Fetching $1"
 
-wget -qO- "$1" | grep -oP "https://podcasts.apple.com/us/podcast/[^\"/]+/$PODCAST_ID" > "$TMP"
+echo "Raw page:"
+wget -qO- "$1"  > "$TMP"
+#cat $TMP
+cp $TMP  /tmp/${PODCAST_NAME}.html
+echo "Saved to /tmp/$PODCAST_NAME.html"
+
+# search /tmp/$PODCAST_NAME.html for json contained between <script id=schema:show type="application/ld+json"> and </script>
+# and write it to screen
+
+
+
+#grep -oE '<script id="schema:show" type="application/ld\+json">.*?</script>' /tmp/$PODCAST_NAME.html 
+# Extract JSON data between <script id="schema:show" type="application/ld+json"> and </script>
+json_package="$(sed -n '/<script id=schema:show type="application\/ld+json">/,/<\/script>/p' /tmp/$PODCAST_NAME.html | sed '1d;$d')"
+
+# format the JSON data
+#echo "$json_package" | jq
+
+# print the "name" and "url" for each "@type": "AudioObject"
+#echo "$json_package" | jq '.itemListElement[] | select(.item["@type"] == "AudioObject") | .item.name, .item.url'
+# Extract and iterate through all {name, url} pairs
+
+CURRENT_DIR=$(pwd)
+temp_dir=$(mktemp -d)
+
+cd $temp_dir
+
+jq -c '.workExample[] | select(."@type" == "AudioObject") | {name, url}' <<< "$json_package" | while IFS= read -r item; do
+    name=$(jq -r '.name' <<< "$item")
+    # replace all non-alphanumeric characters with underscores in name
+    name=$(echo "$name" | sed 's/[^a-zA-Z0-9]/_/g')
+    url=$(jq -r '.url' <<< "$item")
+    
+    # Call your function here with $name and $url
+    echo "Arg:"  "$name" "$url"
+    yt-dlp  "$url" -o "$name.%(ext)s"
+done
+
+cd $CURRENT_DIR
+echo "Look in $temp_dir for the downloaded files"
+
+exit 0
+# | \
+# sed 's/<script id="schema:show" type="application\/ld\+json">//g' | \
+# sed 's/<\/script>//g'
+
+#wget -qO- "$1" | grep -oP "https://podcasts.apple.com/us/podcast/[^\"/]+/$PODCAST_ID" > "$TMP"
 # remove any duplicate lines in $TMP
+
+echo "Before parsing the feed, the file $TMP contains:"
 
 # find all the lines in $TMP that DON"T end in $PODCAST_ID and DO contain a question mark
 # and write them to $TMP.tmp
 #grep -v "$PODCAST_ID" "$TMP" | grep "?" > "$TMP".tmp
 grep "?" "$TMP"  > "$TMP".tmp
 
-cat $TMP.tmp
+#cat $TMP.tmp
 
 exit 0
 
