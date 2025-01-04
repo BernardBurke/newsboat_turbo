@@ -41,7 +41,13 @@ else
 fi
 
 
-yt-dlp -f 139 "$1" -o "$PODOUTUPTSTRING"
+if yt-dlp -f 139 "$1" -o "$PODOUTUPTSTRING"; then
+	echo "139 format not available - trying 140"
+	break
+else
+	yt-dlp -f 140 "$1" -o "$PODOUTUPTSTRING"
+fi
+
 
 detox -v "$PODPATH/$uploader/"
 
