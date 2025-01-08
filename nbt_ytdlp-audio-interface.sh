@@ -41,11 +41,12 @@ else
 fi
 
 
-if yt-dlp -f 139 "$1" -o "$PODOUTUPTSTRING"; then
-	echo "139 format not available - trying 140"
+if yt-dlp -f 140 "$1" -o "$PODOUTUPTSTRING"; then
+	echo "140 download complete"
 	break
 else
-	yt-dlp -f 140 "$1" -o "$PODOUTUPTSTRING"
+	echo "140 format not available - trying 139"
+	yt-dlp -f 139 "$1" -o "$PODOUTUPTSTRING"
 fi
 
 
