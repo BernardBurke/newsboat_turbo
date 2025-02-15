@@ -3,7 +3,7 @@ if [[ "$1" == "" ]]; then
 	exit 1
 fi
 
-PODPATH=~/Poddle
+PODPATH=/media/Vodcasts
 
 # write the current time and $1 into >> $HOME/yix_data.log
 echo "$(date) $1" >> $HOME/yix_data.log
@@ -18,7 +18,10 @@ get_uploader() {
 	# Extract and print uploader
 	uploader=$(echo "$video_info" | jq -r '.uploader')
 
-	uploader=$(echo "$uploader" | sed -e 's/[ &[:punct:]]/_/g' -e 's/[^[:alnum:]_]//g') 
+#	uploader=$(echo "$uploader" | sed -e 's/[ &[:punct:]]/_/g' -e 's/[^[:alnum:]_]//g') 
+	uploader=$(echo "$uploader" | sed 's/[^[:alnum:] ]//g')
+	# remove any leading or trailing spaces
+	uploader=$(echo "$uploader" | sed 's/^[ \t]*//;s/[ \t]*$//') 
 
 	if [[ -z "$uploader" ]]; then
 		echo ""	
