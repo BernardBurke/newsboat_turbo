@@ -3,7 +3,7 @@ if [[ "$1" == "" ]]; then
 	exit 1
 fi
 
-PODPATH=~/Poddle
+PODPATH=/media/Vodcasts
 
 # write the current time and $1 into >> $HOME/yix_data.log
 echo "$(date) $1" >> $HOME/yix_data.log

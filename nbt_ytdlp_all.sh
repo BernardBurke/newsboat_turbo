@@ -8,7 +8,7 @@ if [[ "$1" == "" ]]; then
 fi
 
 while IFS= read -r url; do
-    $NBT/nbt_ytdlp-audio-interface.sh "$url"
+    $NBT/nbt_ytdlp-vodcast-interface.sh "$url"
 done < "$1"
 
 # ask the user if they want to delete the file with the URLs
