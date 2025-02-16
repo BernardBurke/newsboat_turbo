@@ -25,12 +25,14 @@ title=$(echo "$title" | sed 's/[^[:alnum:] ]//g')
 title=$(echo "$title" | sed 's/^[ \t]*//;s/[ \t]*$//')
 echo "Title: $title"
 ext=$(echo "$VIDEO_JSON" | jq -r '.ext')
+echo "File extension $ext"
 description=$(echo "$VIDEO_JSON" | jq -r '.description')
 echo "Description: $description"
 thumbnail=$(echo "$VIDEO_JSON" | jq -r '.thumbnail')
 echo "Thumbnail: $thumbnail"
 
-
+json_filename="$(echo "$VIDEO_JSON" | jq -r '.filename')"
+echo "Filename from json" 
 # if [[ $uploader == "" ]]; then
 # 	echo "Uploader not found in json - using the default uploader string"
 # 	PODTEMPSTRING="$PODPATH/%(uploader)s/%(title)s.%(ext)s"
@@ -40,7 +42,7 @@ echo "Thumbnail: $thumbnail"
 # 	PODTEMPSTRING="$PODPATH/$uploader/%(title)s.%(ext)s"
 # fi
 
-OUTPUT_FILENAME="$PODPATH/$uploader/$title.mp4"
+OUTPUT_FILENAME="$PODPATH/$uploader/$title.$ext"
 # if the PODPATH/$uploader directory does not exist, create it
 if [ ! -d "$PODPATH/$uploader" ]; then
 	mkdir -p "$PODPATH/$uploader"
@@ -56,6 +58,13 @@ else
 fi
 
 echo "Updating metadata"
+
+if [[ ! -f "$PODTEMPSTRING" ]]; then
+	echo "Looks like outputfile changed. Trying to add .mkv for the sake of ffmpeg"
+	PODTEMPSTRING="${PODTEMPSTRING}.mkv"
+	OUTPUT_FILENAME="${title}.mp4"
+fi
+
 
 ffmpeg -i "$PODTEMPSTRING"  -c copy -metadata ThumbnailURL=$thumbnail -metadata title="$title" -metadata description="$description" -metadata artist="$uploader" -metadata album_artist="$uploader" -metadata album="$uploader" -metadata genre="Podcast" -metadata year="$(date +%Y)" -metadata artwork="$thumbnail" "$OUTPUT_FILENAME"
 
