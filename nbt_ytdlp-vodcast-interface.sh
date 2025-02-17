@@ -42,25 +42,40 @@ echo "Filename from json"
 # 	PODTEMPSTRING="$PODPATH/$uploader/%(title)s.%(ext)s"
 # fi
 
-OUTPUT_FILENAME="$PODPATH/$uploader/$title.$ext"
+#OUTPUT_FILENAME="$PODPATH/$uploader/$title.$ext"
+
+OUTPUT_FILENAME="$PODPATH/$uploader/$title.m4a"
 # if the PODPATH/$uploader directory does not exist, create it
 if [ ! -d "$PODPATH/$uploader" ]; then
 	mkdir -p "$PODPATH/$uploader"
 fi
-PODTEMPSTRING="/tmp/$uploader/$title.$ext"
+# PODTEMPSTRING="/tmp/$uploader/$title.$ext"
+PODTEMPSTRING="/tmp/$uploader/$title.m4a"
 
-echo "Downloading smallest video to $PODTEMPSTRING"
-if yt-dlp -S '+size,+br' "$1" -o "$PODTEMPSTRING"; then
-	echo "Download complete"
+# echo "Downloading smallest video to $PODTEMPSTRING"
+# if yt-dlp -S '+size,+br' "$1" -o "$PODTEMPSTRING"; then
+# 	echo "Download complete"
+# else
+# 	echo "Download failed"
+# 	exit 1
+# fi
+
+echo "Downloading m4a to $PODTEMPSTRING"
+
+if yt-dlp -f 140 "$1" -o "$PODTEMPSTRING"; then
+	echo "140 download complete"
 else
-	echo "Download failed"
-	exit 1
+	echo "140 format not available - trying 139"
+	yt-dlp -f 139 "$1" -o "$PODTEMPSTRING"
 fi
+
+#yt-dlp -f 140 "$1" -o "$PODTEMPSTRING"
 
 echo "Updating metadata"
 
 if [[ ! -f "$PODTEMPSTRING" ]]; then
 	echo "Looks like outputfile changed. Trying to add .mkv for the sake of ffmpeg"
+	exit 1
 	PODTEMPSTRING="${PODTEMPSTRING}.mkv"
 	OUTPUT_FILENAME="${title}.mp4"
 fi
