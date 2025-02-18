@@ -65,8 +65,8 @@ echo "Downloading m4a to $PODTEMPSTRING"
 if yt-dlp -f 140 "$1" -o "$PODTEMPSTRING"; then
 	echo "140 download complete"
 else
-	echo "140 format not available - trying 139"
-	yt-dlp -f 139 "$1" -o "$PODTEMPSTRING"
+	echo "140 format not available - trying 140-0"
+	yt-dlp -f 140-0 "$1" -o "$PODTEMPSTRING"
 fi
 
 #yt-dlp -f 140 "$1" -o "$PODTEMPSTRING"
