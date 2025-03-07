@@ -62,23 +62,29 @@ PODTEMPSTRING="/tmp/$uploader/$title.m4a"
 
 echo "Downloading m4a to $PODTEMPSTRING"
 
-if yt-dlp -f 140 "$1" -o "$PODTEMPSTRING"; then
-	echo "140 download complete"
-else
-	echo "140 format not available - trying 140-0"
-	yt-dlp -f 140-0 "$1" -o "$PODTEMPSTRING"
-fi
+# if yt-dlp -f 140 "$1" -o "$PODTEMPSTRING"; then
+# 	echo "140 download complete"
+# else
+# 	echo "140 format not available - trying 140-0"
+# 	yt-dlp -f 140-0 "$1" -o "$PODTEMPSTRING"
+# fi
 
 #yt-dlp -f 140 "$1" -o "$PODTEMPSTRING"
+
+
+yt-dlp -f 'bestaudio[ext=m4a]' "$1" -o "$PODTEMPSTRING"
 
 echo "Updating metadata"
 
 if [[ ! -f "$PODTEMPSTRING" ]]; then
-	echo "Looks like outputfile changed. Trying to add .mkv for the sake of ffmpeg"
+	echo "File not found. Exiting"
 	exit 1
-	PODTEMPSTRING="${PODTEMPSTRING}.mkv"
-	OUTPUT_FILENAME="${title}.mp4"
 fi
+	# echo "Looks like outputfile changed. Trying to add .mkv for the sake of ffmpeg"
+	# exit 1
+	# PODTEMPSTRING="${PODTEMPSTRING}.mkv"
+	# OUTPUT_FILENAME="${title}.mp4"
+	#fi
 
 
 ffmpeg -i "$PODTEMPSTRING"  -c copy -metadata ThumbnailURL=$thumbnail -metadata title="$title" -metadata description="$description" -metadata artist="$uploader" -metadata album_artist="$uploader" -metadata album="$uploader" -metadata genre="Podcast" -metadata year="$(date +%Y)" -metadata artwork="$thumbnail" "$OUTPUT_FILENAME"
