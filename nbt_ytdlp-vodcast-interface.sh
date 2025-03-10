@@ -3,7 +3,11 @@ if [[ "$1" == "" ]]; then
 	exit 1
 fi
 
-PODPATH=/media/Vodcasts
+if [[ "$PODPATH" != "" ]]; then
+	echo "PODPATH set externally to $PODPATH"
+else
+	PODPATH=/media/Vodcasts
+fi
 
 # write the current time and $1 into >> $HOME/yix_data.log
 echo "$(date) $1" >> $HOME/yix_data.log
@@ -27,6 +31,8 @@ echo "Title: $title"
 ext=$(echo "$VIDEO_JSON" | jq -r '.ext')
 echo "File extension $ext"
 description=$(echo "$VIDEO_JSON" | jq -r '.description')
+# add a line break the current description and add the URL via $1 to description
+description="$description   -- original_url: $1"
 echo "Description: $description"
 thumbnail=$(echo "$VIDEO_JSON" | jq -r '.thumbnail')
 echo "Thumbnail: $thumbnail"
@@ -87,7 +93,7 @@ fi
 	#fi
 
 
-ffmpeg -i "$PODTEMPSTRING"  -c copy -metadata ThumbnailURL=$thumbnail -metadata title="$title" -metadata description="$description" -metadata artist="$uploader" -metadata album_artist="$uploader" -metadata album="$uploader" -metadata genre="Podcast" -metadata year="$(date +%Y)" -metadata artwork="$thumbnail" "$OUTPUT_FILENAME"
+ffmpeg -i "$PODTEMPSTRING"  -c copy  -metadata title="$title" -metadata description="$description" -metadata artist="$uploader" -metadata album_artist="$uploader" -metadata album="$uploader" -metadata genre="Podcast" -metadata year="$(date +%Y)" -metadata artwork="$thumbnail" "$OUTPUT_FILENAME"
 
 #mv "$PODTEMPSTRING.tmp" "$PODTEMPSTRING" -v
 
