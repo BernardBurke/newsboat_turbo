@@ -58,7 +58,6 @@ fi
 # PODTEMPSTRING="/tmp/$uploader/$title.$ext"
 PODTEMPSTRING="/tmp/$uploader/$title.m4a"
 
-<<<<<<< HEAD
 echo "Downloading smallest video to $PODTEMPSTRING"
 if yt-dlp -S '+size,+br' "$1" -o "$PODTEMPSTRING"; then
 	echo "Download complete"
@@ -74,29 +73,6 @@ else
 	fi
 	exit 1
 fi
-=======
-# echo "Downloading smallest video to $PODTEMPSTRING"
-# if yt-dlp -S '+size,+br' "$1" -o "$PODTEMPSTRING"; then
-# 	echo "Download complete"
-# else
-# 	echo "Download failed"
-# 	exit 1
-# fi
-
-echo "Downloading m4a to $PODTEMPSTRING"
-
-# if yt-dlp -f 140 "$1" -o "$PODTEMPSTRING"; then
-# 	echo "140 download complete"
-# else
-# 	echo "140 format not available - trying 140-0"
-# 	yt-dlp -f 140-0 "$1" -o "$PODTEMPSTRING"
-# fi
-
-#yt-dlp -f 140 "$1" -o "$PODTEMPSTRING"
-
-
-yt-dlp -f 'bestaudio[ext=m4a]' "$1" -o "$PODTEMPSTRING"
->>>>>>> refs/remotes/origin/main
 
 echo "Updating metadata"
 
