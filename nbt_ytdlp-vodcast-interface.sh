@@ -51,7 +51,15 @@ echo "Downloading smallest video to $PODTEMPSTRING"
 if yt-dlp -S '+size,+br' "$1" -o "$PODTEMPSTRING"; then
 	echo "Download complete"
 else
-	echo "Download failed"
+	echo "Download failed - url saved to $HOME/yix__error_data.log"
+	echo "$1" >> $HOME/yix__error_data.log
+	read -p "Press enter to try again"
+	if yt-dlp -S '+size,+br' "$1" -o "$PODTEMPSTRING"; then
+		echo "Download completed on second try"
+	else
+		echo "Download failed again"
+		echo "$1" >> $HOME/yix__error_data.log
+	fi
 	exit 1
 fi
 
