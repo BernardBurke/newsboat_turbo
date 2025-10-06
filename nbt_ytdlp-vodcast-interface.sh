@@ -22,6 +22,8 @@ uploader=$(echo "$VIDEO_JSON" | jq -r '.uploader')
 uploader=$(echo "$uploader" | sed 's/[^[:alnum:] ]//g')
 # remove any leading or trailing spaces
 uploader=$(echo "$uploader" | sed 's/^[ \t]*//;s/[ \t]*$//')
+# replace any spaces in $uploader with underscores
+uploader=$(echo "$uploader" | sed 's/ /_/g')
 echo "Uploader: $uploader"
 
 title=$(echo "$VIDEO_JSON" | jq -r '.title')
