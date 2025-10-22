@@ -61,13 +61,15 @@ fi
 PODTEMPSTRING="/tmp/$uploader/$title.m4a"
 
 echo "Downloading smallest video to $PODTEMPSTRING"
-if yt-dlp -f 'bestaudio[ext=m4a]' "$1" -o "$PODTEMPSTRING"; then
+# waiting on Deno
+#if yt-dlp -f 'bestaudio[ext=m4a]' "$1" -o "$PODTEMPSTRING"; then
+if yt-dlp  -x --audio-format m4a  "$1" -o "$PODTEMPSTRING"; then
 	echo "Download complete"
 else
 	echo "Download failed - url saved to $HOME/yix__error_data.log"
 	echo "$1" >> $HOME/yix__error_data.log
 	read -p "Press enter to try again"
-	if yt-dlp -f 'bestaudio[ext=m4a]' "$1" -o "$PODTEMPSTRING"; then
+	if yt-dlp --extractor-args "youtube:player_js_version=actual" -x --audio-format m4a "$1" -o "$PODTEMPSTRING"; then
 		echo "Download completed on second try"
 	else
 		echo "Download failed again"
