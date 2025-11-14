@@ -12,7 +12,7 @@ if [[ "$PODPATH" != "" ]]; then
 	echo "PODPATH set externally to $PODPATH"
 else
 	# Use a safe default directory path
-	PODPATH="$HOME/Vodcasts"
+	PODPATH="/media/Vodcasts"
 fi
 
 # Log the current operation
