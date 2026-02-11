@@ -76,7 +76,7 @@ fi
 
 # --- Setup Output Paths ---
 
-OUTPUT_FILENAME="$PODPATH/$uploader/$title.m4a"
+OUTPUT_FILENAME="$PODPATH/$uploader/$titles/$title.m4a"
 PODTEMPSTRING="/tmp/$uploader/$title.m4a" # Temporary file for audio download
 
 # Create directory if it doesn't exist
