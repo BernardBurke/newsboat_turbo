@@ -76,7 +76,11 @@ fi
 
 # --- Setup Output Paths ---
 
-OUTPUT_FILENAME="$PODPATH/$uploader/$titles/$title.m4a"
+OUTPUT_FILENAME="$PODPATH/$uploader/$title/$title.m4a"
+mkdir -p "$(dirname "$OUTPUT_FILENAME")" # Ensure output directory exists
+cp "$THUMBNAIL_FILE" "$(dirname "$OUTPUT_FILENAME")/cover.jpg" # Save thumbnail in output directory for reference
+# and lets replace cover.jpg in $PODPATH/$uploader/
+cp "$THUMBNAIL_FILE" "$PODPATH/$uploader/cover.jpg"
 PODTEMPSTRING="/tmp/$uploader/$title.m4a" # Temporary file for audio download
 
 # Create directory if it doesn't exist
