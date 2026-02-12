@@ -14,7 +14,7 @@ while true; do
         if validate_input "$CURRENT_CONTENT" "youtube"; then
             echo 
             
-            notify-send "YouTube Watcher" "🚀 New Link Detected: $CURRENT_CONTENT" "Starting download..." --icon=video-x-generic
+            notify-send "YouTube Watcher" "🚀 New Link Detected: $CURRENT_CONTENT Starting download..." --icon=video-x-generic
 
             # 3. Trigger your downloader
             "$NBT/nbt_ytdlp-vodcast-enhanced.sh" "$CURRENT_CONTENT"
