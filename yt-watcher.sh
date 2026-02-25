@@ -17,7 +17,7 @@ while true; do
             notify-send "YouTube Watcher" "🚀 New Link Detected: $CURRENT_CONTENT Starting download..." --icon=video-x-generic
 
             # 3. Trigger your downloader
-            "$NBT/nbt_ytdlp-vodcast-enhanced.sh" "$CURRENT_CONTENT"
+            "$LME/yod_one.sh" "$CURRENT_CONTENT"
             
             # 4. Update LAST_URL so we don't download the same thing twice
             LAST_URL="$CURRENT_CONTENT"
