@@ -6,6 +6,7 @@ import datetime
 import re
 import subprocess
 import urllib.request
+import shutil  # Added to handle local file copying
 
 # --- Configuration ---
 # The exact folder where your Audiobookshelf "Yodcasts" library lives
@@ -63,14 +64,24 @@ def process_and_move_audio(json_path, audio_path):
     if not thumb_url:
         thumb_url = data.get('thumbnail')
 
-    # 5. Embed via FFmpeg and output directly to the ABS library folder
+    # 5. Handle Cover Art & Embed via FFmpeg
     try:
-        if thumb_url:
-            print(f"🖼️ Downloading new channel cover art: {thumb_url}")
-            # Shape-shifter hack: permanently save as cover.jpg to overwrite the channel image
-            cover_art_path = os.path.join(author_dir, "cover.jpg")
-            urllib.request.urlretrieve(thumb_url, cover_art_path)
+        valid_cover = False
+        cover_art_path = os.path.join(author_dir, "cover.jpg")
 
+        if thumb_url:
+            if thumb_url.startswith("http://") or thumb_url.startswith("https://"):
+                print(f"🖼️ Downloading new channel cover art: {thumb_url}")
+                urllib.request.urlretrieve(thumb_url, cover_art_path)
+                valid_cover = True
+            elif os.path.exists(thumb_url):
+                print(f"🖼️ Using local cover art file: {thumb_url}")
+                shutil.copy2(thumb_url, cover_art_path)
+                valid_cover = True
+            else:
+                print(f"⚠️ Warning: Could not resolve thumbnail path or URL: {thumb_url}")
+
+        if valid_cover:
             print(f"🎬 Tagging and moving to {final_audio_path}...")
             cmd = [
                 "ffmpeg", "-y", "-i", audio_path, "-i", cover_art_path,
@@ -118,7 +129,7 @@ def process_and_move_audio(json_path, audio_path):
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
-        print("Usage: python3 yt-to-local.py <path_to_info.json> <path_to_audio.m4a>")
+        print("Usage: python3 yt-to-local.py <path_to_info.json> <path_to_audio>")
         sys.exit(1)
         
     print(f"🚀 Starting local drop processing for: {sys.argv[2]}")
