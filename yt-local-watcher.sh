@@ -14,11 +14,15 @@ while true; do
         if validate_input "$CURRENT_CONTENT" "youtube"; then
             echo 
             
-            notify-send "YouTube Watcher" "🚀 New Link Detected: $CURRENT_CONTENT Starting download..." --icon=video-x-generic
+            notify-send "YouTube Watcher" "🚀 New Link Detected: $CURRENT_CONTENT writing queue file..." --icon=video-x-generic
 
-            # 3. Trigger your downloader
-            "$LME/yod_one.sh" "$CURRENT_CONTENT"
-            
+            # 3. write queue file
+            QUEUE_FILE="$HOME/yodcast_drop/queue.txt"
+        
+            # Append the URL to the queue file
+            echo "$LAST_URL" >> "$QUEUE_FILE"
+            echo "📥 Dropped into local queue!"
+                
             # 4. Update LAST_URL so we don't download the same thing twice
             LAST_URL="$CURRENT_CONTENT"
         fi
