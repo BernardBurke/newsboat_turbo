@@ -1,33 +1,29 @@
 #!/usr/bin/env bash
-source "$LME/universal_paste.sh"
 
-echo "Watching clipboard for YouTube links... (Ctrl+C to stop)"
+# Source our new library
+U_PASTE="$LME/universal_paste.sh"
+if [ -f "$U_PASTE" ]; then
+    source "$U_PASTE"
+else
+    echo "❌ Error: Could not find universal_paste.sh"
+    exit 1
+fi
 
-LAST_URL=$(get_pasted_input)
+# Define your drop box location (change this to your SSHFS mount when remote)
+QUEUE_FILE="$HOME/yodcast_drop/queue.txt"
+
+echo "👀 Local Watcher started. Listening for YouTube links to queue..."
 
 while true; do
-    # 1. Grab current clipboard
-    CURRENT_CONTENT=$(get_pasted_input)
-
-    # 2. If it's a NEW YouTube link we haven't processed yet
-    if [[ "$CURRENT_CONTENT" != "$LAST_URL" ]]; then
-        if validate_input "$CURRENT_CONTENT" "youtube"; then
-            echo 
-            
-            notify-send "YouTube Watcher" "🚀 New Link Detected: $CURRENT_CONTENT writing queue file..." --icon=video-x-generic
-
-            # 3. write queue file
-            QUEUE_FILE="$HOME/yodcast_drop/queue.txt"
-        
-            # Append the URL to the queue file
-            echo "$LAST_URL" >> "$QUEUE_FILE"
-            echo "📥 Dropped into local queue!"
-                
-            # 4. Update LAST_URL so we don't download the same thing twice
-            LAST_URL="$CURRENT_CONTENT"
-        fi
-    fi
-
-    # 5. Wait 2 seconds before checking again to save CPU
-    sleep 2
+    # This completely pauses the loop until a valid, NEW YouTube link is copied
+    NEW_URL=$(wait_for_new_paste "youtube")
+    
+    echo "🔗 Caught new link: $NEW_URL"
+    
+    # Append to the queue file
+    echo "$NEW_URL" >> "$QUEUE_FILE"
+    echo "📥 Dropped into $QUEUE_FILE"
+    
+    # Notify the desktop
+    notify-send "Yodcast Queued" "URL added to the drop box." --icon=emblem-default
 done

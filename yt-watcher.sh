@@ -1,29 +1,25 @@
 #!/usr/bin/env bash
-source "$LME/universal_paste.sh"
 
-echo "Watching clipboard for YouTube links... (Ctrl+C to stop)"
+# Source our new library
+U_PASTE="$LMEuniversal_paste.sh"
+YOD_ONE="$HOME/projects/personal/newsboat_turbo/yod_one.sh"
 
-LAST_URL=$(get_pasted_input)
+if [ -f "$U_PASTE" ]; then
+    source "$U_PASTE"
+else
+    echo "❌ Error: Could not find universal_paste.sh"
+    exit 1
+fi
+
+echo "👀 Direct Watcher started. Listening for YouTube links to download..."
 
 while true; do
-    # 1. Grab current clipboard
-    CURRENT_CONTENT=$(get_pasted_input)
-
-    # 2. If it's a NEW YouTube link we haven't processed yet
-    if [[ "$CURRENT_CONTENT" != "$LAST_URL" ]]; then
-        if validate_input "$CURRENT_CONTENT" "youtube"; then
-            echo 
-            
-            notify-send "YouTube Watcher" "🚀 New Link Detected: $CURRENT_CONTENT Starting download..." --icon=video-x-generic
-
-            # 3. Trigger your downloader
-            "$LME/yod_one.sh" "$CURRENT_CONTENT"
-            
-            # 4. Update LAST_URL so we don't download the same thing twice
-            LAST_URL="$CURRENT_CONTENT"
-        fi
-    fi
-
-    # 5. Wait 2 seconds before checking again to save CPU
-    sleep 2
+    # Pause the loop until a valid, NEW YouTube link is copied
+    NEW_URL=$(wait_for_new_paste "youtube")
+    
+    echo "🔗 Caught new link: $NEW_URL"
+    notify-send "Yodcast Started" "Firing up the download engine..." --icon=emblem-default
+    
+    # Execute the download engine directly
+    "$YOD_ONE" "$NEW_URL"
 done
