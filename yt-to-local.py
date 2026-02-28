@@ -52,6 +52,8 @@ def process_and_move_audio(json_path, audio_path):
     os.makedirs(author_dir, exist_ok=True)
     
     final_audio_path = os.path.join(author_dir, f"{video_id}.m4a")
+    input_ext = os.path.splitext(audio_path)[1].lower()
+    audio_codec = "copy" if input_ext == ".m4a" else "aac"
 
     # 4. Find the best thumbnail
     thumb_url = None
@@ -86,7 +88,7 @@ def process_and_move_audio(json_path, audio_path):
             cmd = [
                 "ffmpeg", "-y", "-i", audio_path, "-i", cover_art_path,
                 "-map", "0:a:0", "-map", "1:v:0",
-                "-c:a", "copy", "-c:v:0", "png",
+                "-c:a", audio_codec, "-c:v:0", "png",
                 "-disposition:v:0", "attached_pic",
                 "-metadata", f"title={clean_title_tag}",
                 "-metadata", f"description={description}",
@@ -104,7 +106,7 @@ def process_and_move_audio(json_path, audio_path):
             print(f"⚠️ No cover art found. Tagging and moving to {final_audio_path}...")
             cmd = [
                 "ffmpeg", "-y", "-i", audio_path,
-                "-c", "copy",
+                "-c:a", audio_codec, "-c:v:0", "png",
                 "-metadata", f"title={clean_title_tag}",
                 "-metadata", f"description={description}",
                 "-metadata", f"artist={clean_uploader_tag}",

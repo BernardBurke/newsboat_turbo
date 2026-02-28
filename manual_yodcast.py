@@ -75,6 +75,8 @@ class YodcastIngestor(QWidget):
             self.lbl_cover.setText(os.path.basename(file))
 
     def process_submission(self):
+        import subprocess # Plumbed in to run our CLI script
+
         if not self.audio_path or not self.input_podcast.text() or not self.input_episode.text():
             QMessageBox.warning(self, "Error", "Audio file, Podcast Name, and Episode Title are required!")
             return
@@ -98,8 +100,7 @@ class YodcastIngestor(QWidget):
             "thumbnail": self.cover_path if self.cover_path else ""
         }
 
-        # For testing, we just drop the files in the current directory
-        # Later, we can point this to the SSHFS drop folder or Staging dir
+        # Temp files dropped in the current directory
         output_json_path = f"{unique_id}.info.json"
         output_audio_path = f"{unique_id}.{ext}"
 
@@ -110,8 +111,24 @@ class YodcastIngestor(QWidget):
         # 2. Copy the audio file to match the ID
         shutil.copy2(self.audio_path, output_audio_path)
 
-        QMessageBox.information(self, "Success", f"Generated {output_json_path}\nand {output_audio_path}")
-        self.close()
+        # 3. THE PLUMBING: Run yt-to-local.py automatically
+        yt_script = os.path.expanduser("~/projects/personal/newsboat_turbo/yt-to-local.py")
+        
+        try:
+            print(f"⚙️ Handoff to yt-to-local.py for {unique_id}...")
+            subprocess.run(["python3", yt_script, output_json_path, output_audio_path], check=True)
+            
+            # 4. Cleanup temp files after successful push to NAS
+            os.remove(output_json_path)
+            os.remove(output_audio_path)
+            
+            QMessageBox.information(self, "Success", f"Yodcast seamlessly processed and sent to the library!")
+            self.close()
+
+        except subprocess.CalledProcessError as e:
+            QMessageBox.warning(self, "Processing Error", "FFmpeg/Tagging failed. Check terminal output.")
+        except Exception as e:
+            QMessageBox.warning(self, "Error", f"Could not run yt-to-local script: {e}")
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
