@@ -12,6 +12,23 @@ fi
 # Define your drop box location (change this to your SSHFS mount when remote)
 QUEUE_FILE="$HOME/yodcast_drop/queue.txt"
 
+# ==========================================
+# SYSTEM TRAY ICON SETUP
+# ==========================================
+cleanup() {
+    echo "🛑 Shutting down Local Queue Watcher..."
+    [[ -n "$TRAY_PID" ]] && kill "$TRAY_PID" 2>/dev/null
+    exit 0
+}
+trap cleanup INT TERM EXIT
+
+yad --notification \
+    --image="folder-remote" \
+    --text="Queue Watcher: ON\nClick to stop dropping links." \
+    --command="kill -TERM $$" 2>/dev/null &
+TRAY_PID=$!
+# ==========================================
+
 echo "👀 Local Watcher started. Listening for YouTube links to queue..."
 
 while true; do
