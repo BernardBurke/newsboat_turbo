@@ -6,11 +6,75 @@ import datetime
 import re
 import subprocess
 import urllib.request
-import shutil  # Added to handle local file copying
+import shutil
 
 # --- Configuration ---
 # The exact folder where your Audiobookshelf "Yodcasts" library lives
 ABS_LIBRARY_BASE = "/media/abs_yodcasts"
+
+def force_abs_cover_update(podcast_name, cover_path):
+    """Reads ~/.abs_env and pushes the cover directly to the ABS API."""
+    env_path = os.path.expanduser("~/.abs_env")
+    env_vars = {}
+    
+    # 1. Load credentials (now safely handles "export" prefixes)
+    if os.path.exists(env_path):
+        with open(env_path, 'r') as f:
+            for line in f:
+                line = line.strip()
+                if '=' in line and not line.startswith('#'):
+                    # Strip 'export ' if it exists so we just get the key
+                    if line.startswith("export "):
+                        line = line[7:].strip()
+                    k, v = line.split('=', 1)
+                    env_vars[k.strip()] = v.strip().strip('"\'')
+                    
+    server_url = env_vars.get("AB_SERVER_URL", "http://127.0.0.1:13378").rstrip('/')
+    api_key = env_vars.get("AB_API_KEY")
+    lib_id = env_vars.get("AB_LIB_ID")
+
+    if not api_key or not lib_id:
+        print("⚠️ ABS API credentials not found in ~/.abs_env. Skipping API cover push.")
+        return
+
+    try:
+        # 2. Query the Library to find the Podcast's internal ID
+        print(f"🔍 Looking up internal ABS ID for podcast: {podcast_name}")
+        req = urllib.request.Request(f"{server_url}/api/libraries/{lib_id}/items")
+        req.add_header("Authorization", f"Bearer {api_key}")
+        
+        with urllib.request.urlopen(req) as response:
+            data = json.loads(response.read())
+            
+        podcast_id = None
+        for item in data.get("results", []):
+            # Check if the ABS item matches our folder name
+            if os.path.basename(item.get("path", "")) == podcast_name or \
+               item.get("media", {}).get("metadata", {}).get("title") == podcast_name:
+                podcast_id = item.get("id")
+                break
+                
+        if not podcast_id:
+            print(f"⚠️ Could not find '{podcast_name}' in ABS database yet. It might need a library scan first.")
+            return
+
+        # 3. Push the image directly via the API using curl multipart form
+        print(f"🚀 Pushing new cover art to ABS API for item {podcast_id}...")
+        post_cmd = [
+            "curl", "-s", "-o", "/dev/null", "-w", "%{http_code}", "-X", "POST",
+            f"{server_url}/api/items/{podcast_id}/cover",
+            "-H", f"Authorization: Bearer {api_key}",
+            "-F", f"cover=@{cover_path}"
+        ]
+        
+        post_result = subprocess.run(post_cmd, capture_output=True, text=True, check=True)
+        if post_result.stdout.strip() == "200":
+            print("✅ Cover art successfully updated and cached via API!")
+        else:
+            print(f"⚠️ API returned HTTP {post_result.stdout.strip()} when uploading cover.")
+
+    except Exception as e:
+        print(f"❌ Failed to push cover via API: {e}")
 
 def process_and_move_audio(json_path, audio_path):
     try:
@@ -46,7 +110,7 @@ def process_and_move_audio(json_path, audio_path):
     clean_uploader_tag = re.sub(r'[^a-zA-Z0-9 ]', '', uploader).strip().replace(' ', '_')
     clean_title_tag = re.sub(r'[^a-zA-Z0-9 ]', '', title).strip()
     
-    # Clean folder name for the ABS Library (e.g., "Sabine Hossenfelder")
+    # Clean folder name for the ABS Library
     clean_folder_name = re.sub(r'[^a-zA-Z0-9 ]', '', uploader).strip()
     author_dir = os.path.join(ABS_LIBRARY_BASE, clean_folder_name)
     os.makedirs(author_dir, exist_ok=True)
@@ -106,7 +170,7 @@ def process_and_move_audio(json_path, audio_path):
             print(f"⚠️ No cover art found. Tagging and moving to {final_audio_path}...")
             cmd = [
                 "ffmpeg", "-y", "-i", audio_path,
-                "-c:a", audio_codec, "-c:v:0", "png",
+                "-c:a", audio_codec, 
                 "-metadata", f"title={clean_title_tag}",
                 "-metadata", f"description={description}",
                 "-metadata", f"artist={clean_uploader_tag}",
@@ -121,6 +185,10 @@ def process_and_move_audio(json_path, audio_path):
         # Run FFmpeg
         subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, check=True)
         print("✅ Metadata embedding and file placement complete.")
+
+        # Trigger the API Cover Update
+        if valid_cover:
+            force_abs_cover_update(clean_folder_name, cover_art_path)
 
     except subprocess.CalledProcessError as e:
         print(f"❌ FFmpeg error: {e.stderr.decode()}")
