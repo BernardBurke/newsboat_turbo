@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+exec {lock_fd}>/tmp/yodcast_consumer.lock || exit 1
+flock -n "$lock_fd" || { echo "⚠️ Consumer already running. Exiting."; exit 0; }
+
 DROP_DIR="$HOME/yodcast_drop"
 QUEUE_FILE="$DROP_DIR/queue.txt"
 WORK_FILE="$DROP_DIR/processing.txt"
